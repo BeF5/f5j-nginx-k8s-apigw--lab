@@ -1,0 +1,25 @@
+apiVersion: split.smi-spec.io/v1alpha3
+kind: TrafficSplit
+metadata:
+  name: target-ts
+spec:
+  service: target-svc
+  backends:
+  - service: target-v1-0
+    weight: 0
+  - service: target-v2-0
+    weight: 100
+  matches:
+  - kind: HTTPRouteGroup
+    name: target-scope
+---
+apiVersion: specs.smi-spec.io/v1alpha3
+kind: HTTPRouteGroup
+metadata:
+  name: target-scope
+spec:
+  matches:
+  - name: jwt-group2-users
+    headers:
+      jwtscope: ".*group2.*"
+

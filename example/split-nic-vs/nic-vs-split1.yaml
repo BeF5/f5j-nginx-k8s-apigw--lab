@@ -1,0 +1,22 @@
+apiVersion: k8s.nginx.org/v1
+kind: VirtualServer
+metadata:
+  name: nic
+spec:
+  host: nic.example.com
+  upstreams:
+  - name: target-v1
+    service: target-v1-0
+    port: 80
+  - name: target-v2 
+    service: target-v2-0
+    port: 80
+  routes:
+  - path: /
+    splits:
+    - weight: 90
+      action:
+        pass: target-v1
+    - weight: 10
+      action:
+        pass: target-v2
