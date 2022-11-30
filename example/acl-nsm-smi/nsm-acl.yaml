@@ -1,0 +1,56 @@
+apiVersion: specs.smi-spec.io/v1alpha3
+kind: HTTPRouteGroup
+metadata:
+  name: route-group
+spec:
+  matches:
+  - name: method
+    methods:
+    - POST
+  - name: path
+    pathRegex: "/.*valid.*"
+  - name: header
+    headers:
+      X-Type: "valid"
+
+---
+
+apiVersion: access.smi-spec.io/v1alpha2
+kind: TrafficTarget
+metadata:
+  name: traffic-target-v1
+spec:
+  destination:
+    kind: ServiceAccount
+    name: target-v1-0
+  rules:
+  - kind: HTTPRouteGroup
+    name: route-group
+    matches:
+    - method
+    - path
+    - header
+  sources:
+  - kind: ServiceAccount
+    name: webapp
+
+---
+apiVersion: access.smi-spec.io/v1alpha2
+kind: TrafficTarget
+metadata:
+  name: traffic-target-v2
+spec:
+  destination:
+    kind: ServiceAccount
+    name: target-v2-0
+  rules:
+  - kind: HTTPRouteGroup
+    name: route-group
+    matches:
+    - method
+    - path
+    - header
+  sources:
+  - kind: ServiceAccount
+    name: webapp
+

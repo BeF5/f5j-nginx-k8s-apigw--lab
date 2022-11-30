@@ -1,0 +1,32 @@
+apiVersion: k8s.nginx.org/v1
+kind: VirtualServer
+metadata:
+  name: nic
+spec:
+  host: nic.example.com
+  policies:
+  upstreams:
+  - name: target-svc
+    service: target-svc
+    port: 80
+  routes:
+  - path: ~ /.*valid.*
+    action:
+      pass: target-svc
+  - path: /
+    matches:
+    - conditions:
+      - header: X-Type
+        value: valid
+      action:
+        pass: target-svc
+    - conditions:
+      - variable: $request_method
+        value: POST
+      action:
+        pass: target-svc
+    action:
+      return:
+        code: 403
+        type: text/plain
+        body: "Error\n"

@@ -1,3 +1,9 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: webapp
+---
 apiVersion: v1
 data:
   nginx.conf: |
@@ -30,6 +36,7 @@ spec:
       labels:
         app: webapp
     spec:
+      serviceAccountName: webapp
       containers:
         - image: nginx
           imagePullPolicy: IfNotPresent

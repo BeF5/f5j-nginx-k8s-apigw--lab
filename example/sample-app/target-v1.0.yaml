@@ -1,3 +1,9 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: target-v1-0
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,6 +20,7 @@ spec:
         app: target
         version: "1.0"
     spec:
+      serviceAccountName: target-v1-0
       containers:
       - name: target-v1-0
         image: "nginx"
