@@ -1,0 +1,14 @@
+apiVersion: specs.smi.nginx.com/v1alpha1
+kind: CircuitBreaker
+metadata:
+  name: circuit-breaker
+spec:
+  destination:
+    kind: Service
+    name: target-v2-0-rst
+    namespace: staging
+  errors: 1 
+  timeoutSeconds: 5
+  fallback:
+    service: staging/target-v1-0 
+    port: 80

@@ -1,0 +1,39 @@
+apiVersion: k8s.nginx.org/v1
+kind: VirtualServer
+metadata:
+  name: nic
+spec:
+  host: nic.example.com
+  upstreams:
+  - name: target-v1
+    service: target-v1-0
+    port: 80
+  - name: target-v2-timeout
+    service: target-v2-0-timeout
+    port: 80
+    fail-timeout: 20s
+    max-fails: 1
+    connect-timeout: 2s
+    send-timeout: 2s
+    read-timeout: 2s
+  - name: target-v2-rst
+    service: target-v2-0-rst
+    port: 81
+  routes:
+  - path: /v1
+    action:
+      pass: target-v1
+  - path: /v2-timeout
+    action:
+      pass: target-v2-timeout
+    errorPages:
+    - codes: [504]
+      redirect:
+        code: 301
+        url: ${scheme}://nic.example.com/v1
+  - path: /v2-rst
+    location-snippets: |
+      error_page 502 =302 "${scheme}://${host}/v1?${args}";
+      proxy_intercept_errors on;
+    action:
+      pass: target-v2-rst

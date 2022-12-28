@@ -1,0 +1,91 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: target-v2-0
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: target-v2-0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: target
+      version: "2.0"
+  template:
+    metadata:
+      labels:
+        app: target
+        version: "2.0"
+    spec:
+      serviceAccountName: target-v2-0
+      containers:
+      - name: target-v2-0
+        image: "nginx"
+        ports:
+        - containerPort: 81
+          name: http81
+        - containerPort: 80
+          name: http
+        volumeMounts:
+          - mountPath: /etc/nginx
+            name: nginx-config
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: target-v2-0
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: target-v2-0
+data:
+  nginx.conf: |-
+    events {}
+    http {
+      server {
+        listen 80;
+        location / {
+          proxy_pass http://localhost:9999;
+          #return 200 "target v2.0\n";
+        }
+      }
+    }
+    stream {
+      server {
+        listen 81;
+        deny 127.0.0.1;
+        allow all;
+        return "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\target v2.0\n";
+      }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: target-v2-0-timeout
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: target
+    version: "2.0"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: target-v2-0-rst
+spec:
+  ports:
+  - port: 81
+    targetPort: 81
+    protocol: TCP
+    name: http
+  selector:
+    app: target
+    version: "2.0"
